@@ -18,8 +18,7 @@ const auth = getAuth(app);
 
 function toBit(v, fallback = 0) {
   const n = Number(v);
-  if (n === 0 || n === 1) return n;
-  return fallback;
+  return (n === 0 || n === 1) ? n : fallback;
 }
 
 const gameStateRef = ref(db, "toAltera");
@@ -29,46 +28,29 @@ const gameStatusText = document.getElementById("gameStatusText");
 
 function updateGameUI() {
   if (!gameBtn) return;
-  if (gameRunning) {
-    gameBtn.textContent = "סיים משחק";
-    gameBtn.classList.remove("btn-danger");
-    gameBtn.classList.add("btn-outline-danger");
-    if (gameStatusText) gameStatusText.textContent = "מצב: משחק פעיל";
-  } else {
-    gameBtn.textContent = "להתחיל משחק";
-    gameBtn.classList.remove("btn-outline-danger");
-    gameBtn.classList.add("btn-danger");
-    if (gameStatusText) gameStatusText.textContent = "מצב: ממתין להתחלה";
-  }
+  gameBtn.textContent = gameRunning ? "סיים משחק" : "להתחיל משחק";
+  gameBtn.className = gameRunning ? "btn btn-outline-danger game-btn" : "btn btn-danger game-btn";
+  if (gameStatusText) gameStatusText.textContent = gameRunning ? "מצב: משחק פעיל" : "מצב: ממתין להתחלה";
 }
 
 if (gameBtn) {
   gameBtn.onclick = async () => {
-    gameRunning = !gameRunning;
-    const valueToSend = gameRunning ? 1 : 0;
+    const nextState = gameRunning ? 0 : 1;
     try {
-      await set(gameStateRef, valueToSend);
-      updateGameUI();
-    } catch (e) {
-      gameRunning = !gameRunning;
-      updateGameUI();
-    }
+      await set(gameStateRef, nextState);
+    } catch (e) { console.error("Update failed", e); }
   };
 }
 
 onValue(gameStateRef, (snap) => {
-  const v = Number(snap.val());
-  if (v === 0 || v === 1) {
-    gameRunning = (v === 1);
-    updateGameUI();
-  }
+  gameRunning = (Number(snap.val()) === 1);
+  updateGameUI();
 });
 
-// לוגיקה חדשה: יריות מתחילות ב-7, פגיעות ב-0
 let shotCount = 7; 
 let hitCount = 0;
 let lastB = 0;
-let lastC = 1; // Start at 1 so if it stays 1 it doesn't count, only when it drops to 0
+let lastC = 1;
 let lastData = null;
 
 function render(data) {
@@ -79,74 +61,48 @@ function render(data) {
   const isTooClose = A < 50;
 
   container.innerHTML = `
-    <div class="col-md-4">
+    <div class="col-12 col-md-4">
       <div class="p-4 bg-black border ${isTooClose ? "alert-blink" : "border-secondary"}">
         <div class="stat-label text-danger fw-bold mb-2">PROXIMITY ALERT (A)</div>
         <h2 class="display-5 text-white fw-black m-0">${A} cm</h2>
-        <div class="mt-2 small ${isTooClose ? "text-danger fw-bold" : "text-white-50"}">
-          ${isTooClose ? "TOO CLOSE!" : "SAFE DISTANCE"}
-        </div>
+        <div class="mt-2 small ${isTooClose ? "text-danger fw-bold" : "text-white-50"}">${isTooClose ? "TOO CLOSE!" : "SAFE DISTANCE"}</div>
       </div>
     </div>
-
-    <div class="col-md-4">
+    <div class="col-12 col-md-4">
       <div class="p-4 bg-black border border-secondary">
         <div class="stat-label text-danger fw-bold mb-2">AMMO REMAINING (B)</div>
         <h2 class="display-5 text-white fw-black m-0">${shotCount}</h2>
-        <div class="mt-2 small text-white-50 mb-3">COUNTDOWN TO 0</div>
-        <button id="resetShotsBtn" class="btn btn-outline-danger btn-sm rounded-0 px-4">RELOAD (7)</button>
+        <button id="resetShotsBtn" class="btn btn-outline-danger btn-sm mt-3 w-100">RELOAD (7)</button>
       </div>
     </div>
-
-    <div class="col-md-4">
+    <div class="col-12 col-md-4">
       <div class="p-4 bg-black border border-secondary">
         <div class="stat-label text-danger fw-bold mb-2">TOTAL TARGET HITS (C)</div>
         <h2 class="display-5 text-white fw-black m-0">${hitCount}</h2>
-        <div class="mt-2 small text-white-50 mb-3">FALLING EDGE 1→0</div>
-        <button id="resetHitsBtn" class="btn btn-outline-danger btn-sm rounded-0 px-4">RESET HITS</button>
+        <button id="resetHitsBtn" class="btn btn-outline-danger btn-sm mt-3 w-100">RESET HITS</button>
       </div>
     </div>
   `;
 
-  document.getElementById("resetShotsBtn").onclick = () => {
-    shotCount = 7;
-    lastB = toBit(lastData?.B, lastB);
-    render(lastData);
-  };
-
-  document.getElementById("resetHitsBtn").onclick = () => {
-    hitCount = 0;
-    lastC = toBit(lastData?.C, lastC);
-    render(lastData);
-  };
+  document.getElementById("resetShotsBtn").onclick = () => { shotCount = 7; render(lastData); };
+  document.getElementById("resetHitsBtn").onclick = () => { hitCount = 0; render(lastData); };
 }
 
-const alteraRef = ref(db, "fromAltera");
-onValue(alteraRef, (snapshot) => {
+onValue(ref(db, "fromAltera"), (snapshot) => {
   const data = snapshot.val();
   if (!data) return;
   lastData = data;
-
   const b = toBit(data.B, lastB);
   const c = toBit(data.C, lastC);
 
-  // ירידה בכמות היריות עד 0 (Rising Edge Logic for Button)
-  if (b === 1 && lastB === 0 && shotCount > 0) {
-    shotCount--;
-  }
+  if (b === 1 && lastB === 0 && shotCount > 0) shotCount--;
+  if (c === 0 && lastC === 1) hitCount++;
+  
   lastB = b;
-
-  // === NEW LOGIC: Target Hit on Falling Edge (1 -> 0) ===
-  if (c === 0 && lastC === 1) {
-    hitCount++;
-  }
   lastC = c;
-
   render(data);
 });
 
 document.getElementById("logoutBtn")?.addEventListener("click", () => {
-  signOut(auth).then(() => {
-    window.location.href = "login.html";
-  });
+  signOut(auth).then(() => { window.location.href = "login.html"; });
 });
