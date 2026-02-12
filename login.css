@@ -2,7 +2,7 @@ html, body {
     margin: 0;
     padding: 0;
     width: 100%;
-    height: 100%;
+    min-height: 100%;
     background-color: #000 !important;
     overflow-x: hidden;
     font-family: 'Segoe UI', sans-serif;
@@ -14,6 +14,7 @@ html, body {
     left: 0;
     width: 100vw;
     height: 100vh;
+    /* וודא שהנתיב לתמונה נכון ביחס לקובץ ה-CSS */
     background: url('../img/ezgif-58e22a487e151056.gif') no-repeat center center;
     background-size: cover;
     z-index: -2;
@@ -25,7 +26,7 @@ html, body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.8) !important; /* הגברתי כהות למובייל */
     z-index: -1;
 }
 
@@ -35,12 +36,13 @@ html, body {
     justify-content: center;
     min-height: 100vh;
     padding: 20px;
+    position: relative;
 }
 
 .login-card {
     background: #0a0a0a !important;
     border: 1px solid #dc3545;
-    padding: 35px;
+    padding: 30px; /* מעט פחות פדינג למובייל */
     width: 100%;
     max-width: 400px;
     border-radius: 4px;
@@ -56,6 +58,11 @@ html, body {
     padding: 12px;
 }
 
+/* תיקון צבע הפלייסולדר למובייל כדי שלא יראה לבן */
+.glass-input::placeholder {
+    color: rgba(255,255,255,0.5) !important;
+}
+
 .btn-danger-auth {
     background: #dc3545 !important;
     color: white !important;
@@ -65,4 +72,13 @@ html, body {
     font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 1px;
+}
+
+/* התאמה למסכים קטנים מאוד */
+@media (max-width: 480px) {
+    .login-card {
+        padding: 20px;
+        border-width: 0.5px;
+    }
+    h1 { font-size: 1.5rem; }
 }
