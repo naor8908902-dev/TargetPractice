@@ -14,7 +14,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Safety listener: if login succeeds, move to dashboard immediately
 onAuthStateChanged(auth, (user) => {
     if (user) {
         window.location.replace("dashboard.html");
@@ -22,26 +21,20 @@ onAuthStateChanged(auth, (user) => {
 });
 
 const form = document.getElementById('loginForm');
-
 if (form) {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
         const email = document.getElementById('email').value;
         const pass = document.getElementById('password').value;
         const btn = document.getElementById('loginBtn');
-
         btn.disabled = true;
         btn.innerText = "CONNECTING...";
-
         try {
             await signInWithEmailAndPassword(auth, email, pass);
-            // location.replace works better on mobile than .assign or .href
-            window.location.replace("dashboard.html");
         } catch (err) {
             btn.disabled = false;
             btn.innerText = "ACCESS SYSTEM";
-            alert("Login Failed: " + err.message);
+            alert("Error: " + err.message);
         }
     });
 }
