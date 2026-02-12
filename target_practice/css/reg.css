@@ -1,0 +1,54 @@
+body.auth-bg {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3NueXJleG5rZXZ3eG54bmZ4bmZ4bmZ4bmZ4bmZ4bmZ4bmZ4bmZ4JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKL9p7fW0fL0U7C/giphy.gif') no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Inter', sans-serif;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 50px 40px;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+    border-radius: 4px;
+}
+
+.glass-input {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    border-radius: 0;
+    padding: 12px;
+}
+
+.btn-danger-auth {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 0;
+    transition: 0.3s;
+}
+
+.btn-danger-auth:hover {
+    background: white;
+    color: black;
+}
+
+.tracking-widest { letter-spacing: 2px; }
+
+.fade-in {
+    animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
