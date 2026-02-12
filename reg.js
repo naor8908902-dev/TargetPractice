@@ -17,12 +17,13 @@ const auth = getAuth(app);
 document.getElementById('regForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
     
-    const email = document.getElementById('email').value;
-    const pass = document.getElementById('password').value;
+    // תיקון ה-ID כדי שיתאים ל-HTML
+    const email = document.getElementById('regEmail').value;
+    const pass = document.getElementById('regPassword').value;
 
     createUserWithEmailAndPassword(auth, email, pass)
         .then(() => {
-            alert("החשבון נוצר בהצלחה! מועבר לדף הכניסה.");
+            alert("החשבון נוצר בהצלחה!");
             window.location.href = "login.html";
         })
         .catch((err) => {
