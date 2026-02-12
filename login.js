@@ -14,29 +14,27 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-const loginForm = document.getElementById('loginForm');
+const form = document.getElementById('loginForm');
 
-if (loginForm) {
-    loginForm.addEventListener('submit', (e) => {
+if (form) {
+    form.onsubmit = async (e) => {
         e.preventDefault();
         
         const email = document.getElementById('email').value;
         const pass = document.getElementById('password').value;
         const btn = document.getElementById('loginBtn');
 
-        // מניעת לחיצות כפולות בנייד
         btn.disabled = true;
-        btn.innerText = "LOADING...";
+        btn.innerText = "CONNECTING...";
 
-        signInWithEmailAndPassword(auth, email, pass)
-            .then(() => {
-                // שימוש בנתיב יחסי - וודא ש-dashboard.html באותה תיקייה של דף ה-login
-                window.location.href = "./dashboard.html";
-            })
-            .catch(err => {
-                btn.disabled = false;
-                btn.innerText = "ACCESS SYSTEM";
-                alert("Login Failed: " + err.message);
-            });
-    });
+        try {
+            await signInWithEmailAndPassword(auth, email, pass);
+            // שימוש בנתיב יחסי ללא נקודה בהתחלה ליתר ביטחון ב-GitHub
+            window.location.assign("dashboard.html");
+        } catch (err) {
+            btn.disabled = false;
+            btn.innerText = "ACCESS SYSTEM";
+            alert("Error: " + err.message);
+        }
+    };
 }
