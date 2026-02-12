@@ -1,0 +1,69 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000 !important;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.bg-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: url('../img/ezgif-58e22a487e151056.gif') no-repeat center center;
+    background-size: cover;
+    z-index: -2;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.8), rgba(139, 0, 0, 0.3));
+    z-index: -1;
+}
+
+.auth-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+
+.login-card {
+    background: rgba(10, 10, 10, 0.95) !important;
+    border-right: 4px solid #dc3545;
+    padding: 40px;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+}
+
+.glass-input {
+    background: #111 !important;
+    border: 1px solid #444 !important;
+    color: white !important;
+    margin-bottom: 15px;
+    padding: 10px;
+}
+
+.btn-danger-auth {
+    background: transparent !important;
+    color: #dc3545 !important;
+    border: 2px solid #dc3545 !important;
+    padding: 12px;
+    width: 100%;
+    font-weight: 900;
+    transition: 0.3s;
+}
+
+.btn-danger-auth:hover {
+    background: #dc3545 !important;
+    color: white !important;
+}
