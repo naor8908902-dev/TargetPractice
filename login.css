@@ -1,0 +1,71 @@
+/* login.css */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000000 !important; /* צבע שחור חובה */
+    overflow-x: hidden;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.bg-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    /* הוספת צבע שחור כרקע לפני ה-GIF */
+    background-color: #000000; 
+    background-image: url('../img/ezgif-58e22a487e151056.gif');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+    z-index: -2;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8) !important; /* שכבה כהה מאוד */
+    z-index: -1;
+}
+
+.auth-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.login-card {
+    background: #0a0a0a !important;
+    border: 1px solid #dc3545;
+    padding: 35px;
+    width: 100%;
+    max-width: 400px;
+    border-radius: 4px;
+    text-align: center;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+}
+
+.glass-input {
+    background: #151515 !important;
+    border: 1px solid #333 !important;
+    color: white !important;
+    margin-bottom: 20px;
+    padding: 12px;
+}
+
+.btn-danger-auth {
+    background: #dc3545 !important;
+    color: white !important;
+    border: none;
+    padding: 14px;
+    width: 100%;
+    font-weight: bold;
+    text-transform: uppercase;
+}
