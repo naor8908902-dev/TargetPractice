@@ -14,7 +14,7 @@ html, body {
     height: 100%;
     background: #000 url('../img/ezgif-58e22a487e151056.gif') no-repeat center center;
     background-size: cover;
-    z-index: -2;
+    z-index: 1;
 }
 
 .overlay {
@@ -24,7 +24,12 @@ html, body {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.85) !important;
-    z-index: -1;
+    z-index: 2;
+}
+
+.auth-container {
+    position: relative;
+    z-index: 10; /* מעל הרקע והאובליי */
 }
 
 .login-card {
@@ -32,6 +37,7 @@ html, body {
     border: 1px solid #333;
     border-right: 4px solid #dc3545;
     padding: 35px 25px;
+    position: relative;
 }
 
 .glass-input {
@@ -46,10 +52,13 @@ html, body {
     background-color: #dc3545 !important;
     color: #ffffff !important;
     border: none !important;
-    height: 55px; /* גובה גדול יותר ללחיצה קלה במובייל */
+    height: 55px;
     font-size: 1.1rem;
     box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
     cursor: pointer;
+    display: block;
+    width: 100%;
+    opacity: 1 !important; /* מבטל שקיפות אם קיימת */
 }
 
 .btn-danger-auth:active {
