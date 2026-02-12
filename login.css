@@ -1,58 +1,59 @@
-html, body {
+body.auth-bg {
     margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #000 !important;
-}
-
-.bg-fixed {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #000 url('../img/ezgif-58e22a487e151056.gif') no-repeat center center;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* GIF של ירי במטווח */
+    background: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3NueXJleG5rZXZ3eG54bmZ4bmZ4bmZ4bmZ4bmZ4bmZ4bmZ4bmZ4JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKL9p7fW0fL0U7C/giphy.gif') no-repeat center center fixed;
     background-size: cover;
-    z-index: -2;
-}
-
-.overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.85) !important;
-    z-index: -1;
+    font-family: 'Segoe UI', sans-serif;
 }
 
 .login-card {
-    background: #0d0d0d !important;
-    border: 1px solid #333;
-    border-right: 4px solid #dc3545;
-    padding: 35px 25px;
+    width: 100%;
+    max-width: 400px;
+    padding: 50px 40px;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+    border-radius: 8px;
 }
 
 .glass-input {
-    background: #1a1a1a !important;
-    border: 1px solid #444 !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
     color: white !important;
-    padding: 15px;
-    border-radius: 0;
+    border-radius: 4px;
+}
+
+.glass-input:focus {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
 }
 
 .btn-danger-auth {
-    background-color: #dc3545 !important;
-    color: #ffffff !important;
-    border: none !important;
-    height: 55px; /* גובה גדול יותר ללחיצה קלה במובייל */
-    font-size: 1.1rem;
-    box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
-    cursor: pointer;
+    background: #dc3545;
+    color: white;
+    border: none;
+    transition: 0.3s;
 }
 
-.btn-danger-auth:active {
-    background-color: #a71d2a !important;
-    transform: scale(0.98);
+.btn-danger-auth:hover {
+    background: white;
+    color: black;
+    transform: translateY(-2px);
+}
+
+.tracking-widest { letter-spacing: 2px; }
+
+.fade-in {
+    animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
 }

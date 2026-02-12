@@ -14,27 +14,14 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-const form = document.getElementById('loginForm');
+document.getElementById('loginForm')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const pass = document.getElementById('password').value;
 
-if (form) {
-    form.onsubmit = async (e) => {
-        e.preventDefault();
-        
-        const email = document.getElementById('email').value;
-        const pass = document.getElementById('password').value;
-        const btn = document.getElementById('loginBtn');
-
-        btn.disabled = false;
-        btn.innerText = "CONNECTING...";
-
-        try {
-            await signInWithEmailAndPassword(auth, email, pass);
-            // שימוש בנתיב יחסי ללא נקודה בהתחלה ליתר ביטחון ב-GitHub
-            window.location.assign("dashboard.html");
-        } catch (err) {
-            btn.disabled = false;
-            btn.innerText = "ACCESS SYSTEM";
-            alert("Error: " + err.message);
-        }
-    };
-}
+    signInWithEmailAndPassword(auth, email, pass)
+        .then(() => {
+            window.location.href = "dashboard.html";
+        })
+        .catch(err => alert("שגיאה: " + err.message));
+});
