@@ -24,7 +24,7 @@ if (form) {
         const pass = document.getElementById('password').value;
         const btn = document.getElementById('loginBtn');
 
-        btn.disabled = true;
+        btn.disabled = false;
         btn.innerText = "CONNECTING...";
 
         try {
