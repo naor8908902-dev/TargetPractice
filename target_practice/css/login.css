@@ -1,43 +1,36 @@
 /* login.css */
-
-/* הגנה בסיסית לרקע */
 html, body {
     margin: 0;
     padding: 0;
     width: 100%;
-    min-height: 100vh;
-    background-color: #000000 !important;
-    color: white;
+    height: 100%;
+    background-color: #000000 !important; /* צבע שחור חובה */
     overflow-x: hidden;
     font-family: 'Segoe UI', sans-serif;
 }
 
-/* הגדרת מחלקה נוספת לגיבוי ב-HTML */
-.bg-black-fallback {
-    background-color: #000000 !important;
-}
-
-/* הרקע עם ה-GIF */
 .bg-fixed {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    /* יציאה מתיקיית css וכניסה ל-img */
-    background: #000 url('../img/ezgif-58e22a487e151056.gif') no-repeat center center;
+    /* הוספת צבע שחור כרקע לפני ה-GIF */
+    background-color: #000000; 
+    background-image: url('../img/ezgif-58e22a487e151056.gif');
+    background-repeat: no-repeat;
+    background-position: center center;
     background-size: cover;
     z-index: -2;
 }
 
-/* השכבה הכהה מעל הרקע */
 .overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.85) !important;
+    background: rgba(0, 0, 0, 0.8) !important; /* שכבה כהה מאוד */
     z-index: -1;
 }
 
@@ -48,44 +41,31 @@ html, body {
     min-height: 100vh;
 }
 
-/* כרטיס הלוגין */
 .login-card {
     background: #0a0a0a !important;
     border: 1px solid #dc3545;
-    padding: 30px;
+    padding: 35px;
+    width: 100%;
+    max-width: 400px;
     border-radius: 4px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.9);
-    position: relative;
-    z-index: 10;
+    text-align: center;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.8);
 }
 
-/* תיבות הקלט */
 .glass-input {
     background: #151515 !important;
     border: 1px solid #333 !important;
     color: white !important;
+    margin-bottom: 20px;
     padding: 12px;
 }
 
-.glass-input:focus {
-    background: #1a1a1a !important;
-    border-color: #dc3545 !important;
-    box-shadow: none;
-    color: white !important;
-}
-
-/* כפתור הכניסה */
 .btn-danger-auth {
     background: #dc3545 !important;
     color: white !important;
-    font-weight: bold;
     border: none;
+    padding: 14px;
+    width: 100%;
+    font-weight: bold;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: 0.3s;
-}
-
-.btn-danger-auth:hover {
-    background: #b02a37 !important;
-    transform: translateY(-2px);
 }
