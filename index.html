@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Target Practice | The Future of Training</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-black sticky-top py-3">
+        <div class="container">
+            <a class="navbar-brand fw-black fs-3" href="#" onclick="showSection('home')">TARGET<span class="text-danger">PRACTICE</span></a>
+            <div class="d-flex align-items-center">
+                <button class="btn btn-link nav-link text-white me-4 p-0 border-0" onclick="showSection('home')">בית</button>
+                <button class="btn btn-link nav-link text-white me-4 p-0 border-0" onclick="showSection('contact')">צור קשר</button>
+                <a href="login.html" class="btn btn-danger btn-sm px-4 fw-bold shadow-sm">LOG IN</a>
+            </div>
+        </div>
+    </nav>
+
+    <div id="home-section" class="tab-content">
+        <section class="hero-wrap bg-black text-white d-flex align-items-center">
+            <div class="container py-5">
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <h1 class="main-heading mb-4">דיוק הוא לא מזל.<br>הוא <span class="text-danger">טכנולוגיה.</span></h1>
+                        <p class="fs-4 opacity-75 mb-5" style="max-width: 600px;">מערכת IoT מתקדמת המשלבת חיישנים פיזוקטריים, עיבוד נתונים בענן וניתוח ביצועים בזמן אמת.</p>
+                        <button class="btn btn-outline-light btn-lg rounded-0 px-5" onclick="showSection('contact')">גלה עוד</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="container py-5 mt-5">
+            <div class="row g-5">
+                <div class="col-lg-4">
+                    <div class="info-card-bold">
+                        <h2 class="display-4 fw-black text-danger mb-3">01</h2>
+                        <h3 class="fw-bold mb-3">החומרה</h3>
+                        <p class="text-muted fs-5">שימוש בבקר ESP32 המחובר לרשת אלחוטית, מנועי סרוו לתנועה רציפה וחיישני פגיעה שמזהים פגיעות בדיוק של מיקרו-שניות.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="info-card-bold">
+                        <h2 class="display-4 fw-black text-danger mb-3">02</h2>
+                        <h3 class="fw-bold mb-3">הענן</h3>
+                        <p class="text-muted fs-5">סנכרון מלא מול Firebase Real-time Database המאפשר למערכת לעדכן את הניקוד וזמני התגובה באופן מיידי לכל משתמש מחובר.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="info-card-bold">
+                        <h2 class="display-4 fw-black text-danger mb-3">03</h2>
+                        <h3 class="fw-bold mb-3">המשחק</h3>
+                        <p class="text-muted fs-5">מנועי סרוו שזזים ברציפות על מנת להקשות על השחקן לפגוע במטרה ושיהיה חווית משחק מאתגרת ומנה יותר</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-light py-5 mt-5 border-top">
+            <div class="container py-5">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h2 class="fw-black display-5 mb-4">המטרה שלנו</h2>
+                        <p class="fs-5 text-muted mb-4">פרויקט Target Practice נוצר כדי להנגיש משחק בעל טכנולוגית מתקדמות המערכת מזהה וסופרת כל כדור שנורה ושומרת  את הנתונים, כדי שבאמת תשתפרו מאימון לאימון..</p>
+                    </div>
+                    <div class="col-md-5 offset-md-1">
+                        <div class="p-5 bg-white shadow-sm border-start border-danger border-5">
+                            <h4 class="fw-bold">פרויקט IoT 2026</h4>
+                            <p class="mb-0 text-muted">פותח כחלק ממחקר על שילוב חומרה חכמה במערכות אימון דינמיות.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div id="contact-section" class="tab-content d-none py-5">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-5">
+                    <div class="bg-black text-white p-5 shadow-lg">
+                        <h2 class="fw-black mb-4 border-bottom border-danger pb-3">צרו קשר</h2>
+                        <form id="contactForm">
+                            <div class="mb-4">
+                                <label class="small text-uppercase opacity-50 fw-bold">שם מלא</label>
+                                <input type="text" class="form-control bg-dark border-0 text-white py-3 rounded-0 mt-1" placeholder="הכנס שם...">
+                            </div>
+                            <div class="mb-4">
+                                <label class="small text-uppercase opacity-50 fw-bold">אימייל</label>
+                                <input type="email" class="form-control bg-dark border-0 text-white py-3 rounded-0 mt-1" placeholder="email@example.com">
+                            </div>
+                            <div class="mb-5">
+                                <label class="small text-uppercase opacity-50 fw-bold">הודעה</label>
+                                <textarea class="form-control bg-dark border-0 text-white py-3 rounded-0 mt-1" rows="5" placeholder="איך נוכל לעזור?"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-danger btn-lg w-100 rounded-0 fw-bold py-3">שלח הודעה</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showSection(id) {
+            document.querySelectorAll('.tab-content').forEach(s => s.classList.add('d-none'));
+            document.getElementById(id + '-section').classList.remove('d-none');
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+    </script>
+    <script type="module" src="script.js"></script>
+</body>
+</html>
