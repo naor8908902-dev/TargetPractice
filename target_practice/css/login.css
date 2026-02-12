@@ -1,32 +1,43 @@
+/* login.css */
+
+/* הגנה בסיסית לרקע */
 html, body {
     margin: 0;
     padding: 0;
     width: 100%;
-    min-height: 100%;
-    background-color: #000 !important;
+    min-height: 100vh;
+    background-color: #000000 !important;
+    color: white;
     overflow-x: hidden;
     font-family: 'Segoe UI', sans-serif;
 }
 
+/* הגדרת מחלקה נוספת לגיבוי ב-HTML */
+.bg-black-fallback {
+    background-color: #000000 !important;
+}
+
+/* הרקע עם ה-GIF */
 .bg-fixed {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    /* וודא שהנתיב לתמונה נכון ביחס לקובץ ה-CSS */
-    background: url('../img/ezgif-58e22a487e151056.gif') no-repeat center center;
+    /* יציאה מתיקיית css וכניסה ל-img */
+    background: #000 url('../img/ezgif-58e22a487e151056.gif') no-repeat center center;
     background-size: cover;
     z-index: -2;
 }
 
+/* השכבה הכהה מעל הרקע */
 .overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8) !important; /* הגברתי כהות למובייל */
+    background: rgba(0, 0, 0, 0.85) !important;
     z-index: -1;
 }
 
@@ -35,50 +46,46 @@ html, body {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    padding: 20px;
-    position: relative;
 }
 
+/* כרטיס הלוגין */
 .login-card {
     background: #0a0a0a !important;
     border: 1px solid #dc3545;
-    padding: 30px; /* מעט פחות פדינג למובייל */
-    width: 100%;
-    max-width: 400px;
+    padding: 30px;
     border-radius: 4px;
-    text-align: center;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.9);
+    position: relative;
+    z-index: 10;
 }
 
+/* תיבות הקלט */
 .glass-input {
     background: #151515 !important;
     border: 1px solid #333 !important;
     color: white !important;
-    margin-bottom: 20px;
     padding: 12px;
 }
 
-/* תיקון צבע הפלייסולדר למובייל כדי שלא יראה לבן */
-.glass-input::placeholder {
-    color: rgba(255,255,255,0.5) !important;
+.glass-input:focus {
+    background: #1a1a1a !important;
+    border-color: #dc3545 !important;
+    box-shadow: none;
+    color: white !important;
 }
 
+/* כפתור הכניסה */
 .btn-danger-auth {
     background: #dc3545 !important;
     color: white !important;
-    border: none;
-    padding: 14px;
-    width: 100%;
     font-weight: bold;
+    border: none;
     text-transform: uppercase;
     letter-spacing: 1px;
+    transition: 0.3s;
 }
 
-/* התאמה למסכים קטנים מאוד */
-@media (max-width: 480px) {
-    .login-card {
-        padding: 20px;
-        border-width: 0.5px;
-    }
-    h1 { font-size: 1.5rem; }
+.btn-danger-auth:hover {
+    background: #b02a37 !important;
+    transform: translateY(-2px);
 }
