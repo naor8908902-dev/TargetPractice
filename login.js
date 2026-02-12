@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAozTFT0NroGxKEgvtzsZt9gIPfFYqleWg",
@@ -14,24 +14,27 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        window.location.replace("dashboard.html");
-    }
-});
-
 const form = document.getElementById('loginForm');
+
 if (form) {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        
         const email = document.getElementById('email').value;
         const pass = document.getElementById('password').value;
         const btn = document.getElementById('loginBtn');
+
+        console.log("Attempting login for:", email);
+        
         btn.disabled = true;
         btn.innerText = "CONNECTING...";
+
         try {
             await signInWithEmailAndPassword(auth, email, pass);
+            console.log("Login success! Redirecting...");
+            window.location.href = "dashboard.html";
         } catch (err) {
+            console.error("Login error:", err.code);
             btn.disabled = false;
             btn.innerText = "ACCESS SYSTEM";
             alert("Error: " + err.message);
