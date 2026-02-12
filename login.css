@@ -1,46 +1,68 @@
-body, html {
-    margin: 0; padding: 0; height: 100%; width: 100%;
-    background-color: #000; overflow: hidden;
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000 !important;
+    overflow-x: hidden;
     font-family: 'Segoe UI', sans-serif;
 }
 
-/* רקע הגיף הייחודי לכניסה */
-.bg-gif-overlay {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background-image: url('../img/ezgif-58e22a487e151056.gif');
-    background-size: cover; background-position: center;
+.bg-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: url('../img/ezgif-58e22a487e151056.gif') no-repeat center center;
+    background-size: cover;
     z-index: -2;
 }
 
-.dark-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.9) 100%);
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
     z-index: -1;
 }
 
 .auth-container {
-    height: 100vh; display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
 }
 
 .login-card {
-    width: 100%; max-width: 380px; padding: 50px 40px;
-    background: rgba(10, 10, 10, 0.9);
-    border-top: 4px solid #dc3545; /* פס אדום עליון דקורטיבי */
-    box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+    background: #0a0a0a !important;
+    border: 1px solid #dc3545;
+    padding: 35px;
+    width: 100%;
+    max-width: 400px;
+    border-radius: 4px;
     text-align: center;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.8);
 }
 
 .glass-input {
-    background: #1a1a1a !important;
+    background: #151515 !important;
     border: 1px solid #333 !important;
     color: white !important;
-    padding: 15px; margin-bottom: 20px;
+    margin-bottom: 20px;
+    padding: 12px;
 }
 
 .btn-danger-auth {
-    background: #dc3545; color: white; border: none;
-    padding: 15px; font-weight: 800; text-transform: uppercase;
-    transition: 0.4s; width: 100%;
+    background: #dc3545 !important;
+    color: white !important;
+    border: none;
+    padding: 14px;
+    width: 100%;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
-
-.btn-danger-auth:hover { background: #ff4d5e; letter-spacing: 2px; }

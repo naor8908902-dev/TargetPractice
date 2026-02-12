@@ -8,29 +8,18 @@
     <link rel="stylesheet" href="../css/login.css">
 </head>
 <body>
-    <div class="bg-gif-overlay"></div>
-    <div class="dark-overlay"></div>
-
+    <div class="bg-fixed"></div>
+    <div class="overlay"></div>
     <div class="auth-container">
-        <div class="login-card fade-in">
-            <div class="text-center mb-5">
-                <h1 class="fw-bold text-white mb-0">LOG<span class="text-danger">IN</span></h1>
-                <p class="text-white-50 small tracking-widest">FIREARM TRAINING SYSTEM</p>
-            </div>
+        <div class="login-card">
+            <h1 class="text-white fw-bold">LOG<span class="text-danger">IN</span></h1>
+            <p class="text-white-50 small mb-4">FIREARM TRAINING SYSTEM</p>
             <form id="loginForm">
-                <div class="mb-4 text-end">
-                    <label class="form-label text-white small fw-bold">USER EMAIL</label>
-                    <input type="email" id="email" class="form-control glass-input" placeholder="enter your email" required>
-                </div>
-                <div class="mb-5 text-end">
-                    <label class="form-label text-white small fw-bold">PASSWORD</label>
-                    <input type="password" id="password" class="form-control glass-input" placeholder="••••••••" required>
-                </div>
-                <button type="submit" class="btn btn-danger-auth w-100 py-3 fw-bold mb-4">ACCESS SYSTEM</button>
-                <div class="text-center">
-                    <a href="reg.html" class="text-white-50 small text-decoration-none">New user? <span class="text-danger fw-bold">Create Account</span></a>
-                </div>
+                <input type="email" id="email" class="form-control glass-input" placeholder="User Email" required>
+                <input type="password" id="password" class="form-control glass-input" placeholder="Password" required>
+                <button type="submit" class="btn btn-danger-auth">Access System</button>
             </form>
+            <div class="mt-4"><a href="reg.html" class="text-danger text-decoration-none">Create Account</a></div>
         </div>
     </div>
     <script type="module" src="../js/login.js"></script>
