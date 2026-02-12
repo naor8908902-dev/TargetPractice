@@ -21,7 +21,8 @@ document.getElementById('loginForm')?.addEventListener('submit', (e) => {
 
     signInWithEmailAndPassword(auth, email, pass)
         .then(() => {
-            window.location.href = "dashboard.html";
+            // מעבר ישיר לדף הדשבורד
+            window.location.replace("dashboard.html");
         })
-        .catch(err => alert("Error: Check your credentials"));
+        .catch(err => alert("שגיאה: " + err.message));
 });
