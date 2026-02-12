@@ -9,24 +9,25 @@
     
     <link rel="stylesheet" href="../css/login.css">
 </head>
-<body style="background-color: #000 !important;"> <div class="bg-fixed"></div>
+<body class="bg-black-fallback">
+    
+    <div class="bg-fixed"></div>
     <div class="overlay"></div>
 
     <div class="auth-container d-flex align-items-center justify-content-center min-vh-100 p-3">
-        
-        <div class="login-card w-100 fade-in" style="max-width: 400px; position: relative; z-index: 10;" dir="ltr">
+        <div class="login-card w-100" style="max-width: 400px;" dir="ltr">
             
             <h1 class="text-white fw-bold text-center">LOG<span class="text-danger">IN</span></h1>
             <p class="text-white-50 small mb-4 text-center">FIREARM TRAINING SYSTEM</p>
             
             <form id="loginForm">
-                <div class="mb-3">
-                    <label class="text-white-50 small d-block mb-1 text-start">USER EMAIL</label>
-                    <input type="email" id="email" class="form-control glass-input" placeholder="enter your email" style="font-size: 16px;" required>
+                <div class="mb-3 text-start">
+                    <label class="text-white-50 small mb-1">USER EMAIL</label>
+                    <input type="email" id="email" class="form-control glass-input" placeholder="enter your email" required>
                 </div>
-                <div class="mb-4">
-                    <label class="text-white-50 small d-block mb-1 text-start">PASSWORD</label>
-                    <input type="password" id="password" class="form-control glass-input" placeholder="........" style="font-size: 16px;" required>
+                <div class="mb-4 text-start">
+                    <label class="text-white-50 small mb-1">PASSWORD</label>
+                    <input type="password" id="password" class="form-control glass-input" placeholder="........" required>
                 </div>
                 <button type="submit" class="btn btn-danger-auth w-100 py-3">ACCESS SYSTEM</button>
             </form>
