@@ -23,5 +23,5 @@ document.getElementById('loginForm')?.addEventListener('submit', (e) => {
         .then(() => {
             window.location.href = "dashboard.html";
         })
-        .catch(err => alert("שגיאה בכניסה: " + err.message));
+        .catch(err => alert("Error: Check your credentials"));
 });
