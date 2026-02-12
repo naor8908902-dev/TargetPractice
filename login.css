@@ -1,25 +1,42 @@
 body.auth-bg {
     margin: 0;
-    height: 100vh;
+    padding: 0;
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    /* GIF של ירי במטווח */
-    background: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3NueXJleG5rZXZ3eG54bmZ4bmZ4bmZ4bmZ4bmZ4bmZ4bmZ4bmZ4JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKL9p7fW0fL0U7C/giphy.gif') no-repeat center center fixed;
-    background-size: cover;
     font-family: 'Segoe UI', sans-serif;
+    background-color: #000; /* צבע גיבוי */
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* שכבת הרקע עם הגיף - הפתרון למובייל */
+body.auth-bg::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* כאן שמתי את ה-URL של הגיף שלך */
+    background: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3NueXJleG5rZXZ3eG54bmZ4bmZ4bmZ4bmZ4bmZ4bmZ4bmZ4bmZ4JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKL9p7fW0fL0U7C/giphy.gif') no-repeat center center;
+    background-size: cover;
+    z-index: -1; /* מוודא שהרקע נשאר מאחור */
 }
 
 .login-card {
-    width: 100%;
+    width: 90%; /* מתאים יותר למסכים קטנים */
     max-width: 400px;
-    padding: 50px 40px;
-    background: rgba(0, 0, 0, 0.75);
+    padding: 40px 30px;
+    background: rgba(0, 0, 0, 0.8); /* טיפה יותר כהה להגברת הניגודיות */
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
     border-radius: 8px;
+    position: relative;
+    z-index: 1;
 }
 
 .glass-input {
@@ -56,4 +73,11 @@ body.auth-bg {
 @keyframes fadeIn {
     from { opacity: 0; transform: scale(0.95); }
     to { opacity: 1; transform: scale(1); }
+}
+
+/* התאמה ספציפית למסכים קטנים מאוד */
+@media (max-width: 480px) {
+    .login-card {
+        padding: 30px 20px;
+    }
 }
