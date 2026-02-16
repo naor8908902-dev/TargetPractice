@@ -16,93 +16,53 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-function toBit(v, fallback = 0) {
-  const n = Number(v);
-  return (n === 0 || n === 1) ? n : fallback;
-}
-
 const gameStateRef = ref(db, "toAltera");
-let gameRunning = false;
 const gameBtn = document.getElementById("gameToggleBtn");
 const gameStatusText = document.getElementById("gameStatusText");
 
-function updateGameUI() {
-  if (!gameBtn) return;
-  gameBtn.textContent = gameRunning ? "סיים משחק" : "להתחיל משחק";
-  gameBtn.className = gameRunning ? "btn btn-outline-danger game-btn" : "btn btn-danger game-btn";
-  if (gameStatusText) gameStatusText.textContent = gameRunning ? "מצב: משחק פעיל" : "מצב: ממתין להתחלה";
-}
-
 if (gameBtn) {
-  gameBtn.onclick = async () => {
-    const nextState = gameRunning ? 0 : 1;
-    try {
-      await set(gameStateRef, nextState);
-    } catch (e) { console.error("Update failed", e); }
-  };
+    gameBtn.onclick = () => {
+        const nextState = gameBtn.textContent.includes("להתחיל") ? 1 : 0;
+        set(gameStateRef, nextState).catch(e => console.error(e));
+    };
 }
 
 onValue(gameStateRef, (snap) => {
-  gameRunning = (Number(snap.val()) === 1);
-  updateGameUI();
+    if (!gameBtn || !gameStatusText) return;
+    const active = Number(snap.val()) === 1;
+    gameBtn.textContent = active ? "סיים משחק" : "להתחיל משחק";
+    gameBtn.className = active ? "btn btn-outline-danger game-btn" : "btn btn-danger game-btn";
+    gameStatusText.textContent = active ? "סטטוס: משחק פעיל" : "סטטוס: ממתין להתחלה";
 });
-
-let shotCount = 7; 
-let hitCount = 0;
-let lastB = 0;
-let lastC = 1;
-let lastData = null;
-
-function render(data) {
-  const container = document.getElementById("data-container");
-  if (!container || !data) return;
-
-  const A = Number(data.A);
-  const isTooClose = A < 50;
-
-  container.innerHTML = `
-    <div class="col-12 col-md-4">
-      <div class="p-4 bg-black border ${isTooClose ? "alert-blink" : "border-secondary"}">
-        <div class="stat-label text-danger fw-bold mb-2">PROXIMITY ALERT (A)</div>
-        <h2 class="display-5 text-white fw-black m-0">${A} cm</h2>
-        <div class="mt-2 small ${isTooClose ? "text-danger fw-bold" : "text-white-50"}">${isTooClose ? "TOO CLOSE!" : "SAFE DISTANCE"}</div>
-      </div>
-    </div>
-    <div class="col-12 col-md-4">
-      <div class="p-4 bg-black border border-secondary">
-        <div class="stat-label text-danger fw-bold mb-2">AMMO REMAINING (B)</div>
-        <h2 class="display-5 text-white fw-black m-0">${shotCount}</h2>
-        <button id="resetShotsBtn" class="btn btn-outline-danger btn-sm mt-3 w-100">RELOAD (7)</button>
-      </div>
-    </div>
-    <div class="col-12 col-md-4">
-      <div class="p-4 bg-black border border-secondary">
-        <div class="stat-label text-danger fw-bold mb-2">TOTAL TARGET HITS (C)</div>
-        <h2 class="display-5 text-white fw-black m-0">${hitCount}</h2>
-        <button id="resetHitsBtn" class="btn btn-outline-danger btn-sm mt-3 w-100">RESET HITS</button>
-      </div>
-    </div>
-  `;
-
-  document.getElementById("resetShotsBtn").onclick = () => { shotCount = 7; render(lastData); };
-  document.getElementById("resetHitsBtn").onclick = () => { hitCount = 0; render(lastData); };
-}
 
 onValue(ref(db, "fromAltera"), (snapshot) => {
-  const data = snapshot.val();
-  if (!data) return;
-  lastData = data;
-  const b = toBit(data.B, lastB);
-  const c = toBit(data.C, lastC);
+    const data = snapshot.val();
+    if (!data) return;
 
-  if (b === 1 && lastB === 0 && shotCount > 0) shotCount--;
-  if (c === 0 && lastC === 1) hitCount++;
-  
-  lastB = b;
-  lastC = c;
-  render(data);
+    const valA = data.A ?? 0;
+    const elA = document.getElementById("val-a");
+    const elB = document.getElementById("val-b");
+    const elC = document.getElementById("val-c");
+    const boxA = document.getElementById("box-a");
+    const statusA = document.getElementById("status-a");
+
+    if (elA) elA.textContent = valA + " CM";
+    if (elB) elB.textContent = data.B ?? 0;
+    if (elC) elC.textContent = data.C ?? 0;
+
+    if (boxA && statusA) {
+        if (valA < 50) {
+            boxA.className = "p-4 bg-black border alert-blink";
+            statusA.textContent = "קרוב מדי!";
+            statusA.className = "mt-2 small text-danger fw-bold";
+        } else {
+            boxA.className = "p-4 bg-black border border-secondary";
+            statusA.textContent = "מרחק בטוח";
+            statusA.className = "mt-2 small text-white-50";
+        }
+    }
 });
 
-document.getElementById("logoutBtn")?.addEventListener("click", () => {
-  signOut(auth).then(() => { window.location.href = "login.html"; });
-});
+document.getElementById("resetShotsBtn").onclick = () => set(ref(db, "fromAltera/B"), 7);
+document.getElementById("resetHitsBtn").onclick = () => set(ref(db, "fromAltera/C"), 0);
+document.getElementById("logoutBtn").onclick = () => signOut(auth).then(() => window.location.href = "login.html");
