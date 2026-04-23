@@ -18,130 +18,153 @@ const auth = getAuth(app);
 
 const toAlteraRef = ref(db, "toAltera");
 const gameBtn = document.getElementById("gameToggleBtn");
-let isResetting = false;
-let gameStatus = 0;
+let isBusy = false;     // נועל את הכפתורים בזמן פעולה
+let gameActive = false; // מצב המשחק האמיתי
 
-// פונקציית שינה יציבה
 const sleep = ms => new Promise(res => setTimeout(res, ms));
 
-/**
- * רצף האיפוס המתוקן:
- * שולח 1 (reset_in = "000001") → ה-FPGA מזהה ומאפס ammo_count ל-7
- * שולח 66 → איפוס פגיעות
- * שולח 0 → חזרה למצב רגיל
- */
-async function runFullResetSequence(btn) {
-    isResetting = true;
+// ─── התחלת משחק ───────────────────────────────────────────────
+async function startGame() {
+    isBusy = true;
+    setButtonState("loading", "מתחיל...");
+
+    try {
+        console.log("START: Sending 1 → activate FPGA");
+        await set(toAlteraRef, 1);
+        await sleep(2000);
+
+        console.log("START: Sending 64 → game active flag");
+        await set(toAlteraRef, 64);
+
+        gameActive = true;
+        setButtonState("active", "סיים משחק");
+    } catch (err) {
+        console.error("Start failed:", err);
+        setButtonState("idle", "להתחיל משחק");
+    } finally {
+        isBusy = false;
+    }
+}
+
+// ─── סיום משחק + איפוס מלא ────────────────────────────────────
+async function stopAndReset(btn) {
+    isBusy = true;
+    const originalText = btn ? btn.textContent : "";
     if (btn) {
         btn.disabled = true;
-        btn.textContent = "מבצע איפוס...";
+        btn.textContent = "מאפס...";
     }
 
     try {
-        // שלב 1: שלח 1 כדי שה-FPGA יזהה reset_in = "000001"
-        // ה-FPGA צריך לראות את הערך הזה למשך לפחות 2,000,000 מחזורים (res_timer)
-        console.log("Step 1: Sending 1 → FPGA reset_in = 000001");
-        await set(toAlteraRef, 1);
-        await sleep(2500); // 2.5 שניות — מספיק זמן ל-safe_reset לעלות
+        // שלב 1: כבה את המשחק
+        console.log("RESET Step 1: Sending 0 → idle");
+        await set(toAlteraRef, 0);
+        await sleep(500);
 
-        // שלב 2: איפוס פגיעות
-        console.log("Step 2: Sending 66 → Reset Hits");
+        // שלב 2: שלח סיגנל איפוס תחמושת ל-FPGA
+        // ה-FPGA מחכה ל-reset_in = "000001" (ערך עשרוני 1) למשך 2M מחזורים
+        console.log("RESET Step 2: Sending 1 → FPGA reset_in=000001 (ammo → 7)");
+        await set(toAlteraRef, 1);
+        await sleep(2500); // 2.5 שניות להבטחת safe_reset
+
+        // שלב 3: איפוס פגיעות
+        console.log("RESET Step 3: Sending 66 → reset hits");
         await set(toAlteraRef, 66);
-        if (document.getElementById("val-c"))
-            document.getElementById("val-c").textContent = "0";
+        const valC = document.getElementById("val-c");
+        if (valC) valC.textContent = "0";
         await sleep(2000);
 
-        // שלב 3: חזרה למצב רגיל
-        console.log("Step 3: Sending 0 → Idle");
+        // שלב 4: חזרה למנוחה
+        console.log("RESET Step 4: Sending 0 → final idle");
         await set(toAlteraRef, 0);
 
-        // עדכון UI ידני לאחר איפוס מוצלח
-        if (document.getElementById("val-b"))
-            document.getElementById("val-b").textContent = "7";
+        const valB = document.getElementById("val-b");
+        if (valB) valB.textContent = "7";
 
-    } catch (error) {
-        console.error("Reset sequence failed:", error);
+        gameActive = false;
+        setButtonState("idle", "להתחיל משחק");
+    } catch (err) {
+        console.error("Reset failed:", err);
+        setButtonState("active", "סיים משחק");
     } finally {
-        isResetting = false;
-        if (btn) {
+        isBusy = false;
+        if (btn && btn !== gameBtn) {
             btn.disabled = false;
-            // שחזר טקסט לפי מצב המשחק
-            btn.textContent = (gameStatus === 1 || gameStatus === 64)
-                ? "סיים משחק"
-                : "להתחיל משחק";
+            btn.textContent = originalText;
         }
     }
 }
 
+// ─── עדכון מראה הכפתור הראשי ──────────────────────────────────
+function setButtonState(state, text) {
+    if (!gameBtn) return;
+    gameBtn.textContent = text;
+    gameBtn.disabled = (state === "loading");
+    if (state === "active") {
+        gameBtn.className = "btn btn-outline-danger game-btn";
+    } else if (state === "idle") {
+        gameBtn.className = "btn btn-danger game-btn";
+    } else {
+        gameBtn.className = "btn btn-secondary game-btn";
+    }
+}
+
+// ─── כפתור ראשי: התחל / סיים ──────────────────────────────────
 const handleGameAction = async (e) => {
     if (e && e.cancelable) e.preventDefault();
-    if (isResetting) return;
+    if (isBusy) return;
 
-    if (gameStatus === 0) {
-        // התחלת משחק — שלח 64 (לא 1 כדי לא להתנגש עם reset)
-        await set(toAlteraRef, 64);
+    if (!gameActive) {
+        await startGame();
     } else {
-        // סיום משחק — הפעל רצף איפוס מלא
-        await runFullResetSequence(gameBtn);
+        await stopAndReset(gameBtn);
     }
 };
 
-// חיבור אירועים לכפתור הראשי
 if (gameBtn) {
     gameBtn.addEventListener('click', handleGameAction);
     gameBtn.addEventListener('touchstart', handleGameAction, { passive: false });
 }
 
-// כפתור "טען מחדש" — מבצע את רצף האיפוס המלא
+// ─── כפתור "טען מחדש" ─────────────────────────────────────────
 const resetShotsBtn = document.getElementById("resetShotsBtn");
 if (resetShotsBtn) {
     const handleResetShots = async (e) => {
         if (e && e.cancelable) e.preventDefault();
-        if (isResetting) return;
-        await runFullResetSequence(resetShotsBtn);
+        if (isBusy) return;
+        await stopAndReset(resetShotsBtn);
     };
     resetShotsBtn.addEventListener('click', handleResetShots);
     resetShotsBtn.addEventListener('touchstart', handleResetShots, { passive: false });
 }
 
-// כפתור "איפוס פגיעות" — שולח רק 66
+// ─── כפתור "איפוס פגיעות" ─────────────────────────────────────
 const resetHitsBtn = document.getElementById("resetHitsBtn");
 if (resetHitsBtn) {
     const handleHits = async (e) => {
         if (e && e.cancelable) e.preventDefault();
-        if (isResetting) return;
+        if (isBusy) return;
         await set(toAlteraRef, 66);
-        if (document.getElementById("val-c"))
-            document.getElementById("val-c").textContent = "0";
+        const valC = document.getElementById("val-c");
+        if (valC) valC.textContent = "0";
     };
     resetHitsBtn.addEventListener('click', handleHits);
     resetHitsBtn.addEventListener('touchstart', handleHits, { passive: false });
 }
 
-// האזנה לשינויים ב-toAltera → עדכון כפתור המשחק
-onValue(toAlteraRef, (snap) => {
-    if (!gameBtn || isResetting) return;
-    gameStatus = Number(snap.val());
-    const active = (gameStatus === 1 || gameStatus === 64);
-    gameBtn.textContent = active ? "סיים משחק" : "להתחיל משחק";
-    gameBtn.className = active
-        ? "btn btn-outline-danger game-btn"
-        : "btn btn-danger game-btn";
-});
-
-// האזנה לנתונים מה-FPGA → עדכון UI
+// ─── האזנה לנתונים מה-FPGA ────────────────────────────────────
 onValue(ref(db, "fromAltera"), (snapshot) => {
-    if (isResetting) return;
+    if (isBusy) return;
     const data = snapshot.val();
     if (!data) return;
-    if (document.getElementById("val-a"))
-        document.getElementById("val-a").textContent = (data.A ?? 0) + " CM";
-    if (document.getElementById("val-b"))
-        document.getElementById("val-b").textContent = data.B ?? 0;
-    if (document.getElementById("val-c"))
-        document.getElementById("val-c").textContent = data.C ?? 0;
+    const valA = document.getElementById("val-a");
+    const valB = document.getElementById("val-b");
+    const valC = document.getElementById("val-c");
+    if (valA) valA.textContent = (data.A ?? 0) + " CM";
+    if (valB) valB.textContent = data.B ?? 0;
+    if (valC) valC.textContent = data.C ?? 0;
 });
 
-// כפתור התנתקות
+// ─── התנתקות ──────────────────────────────────────────────────
 document.getElementById("logoutBtn").onclick = () =>
     signOut(auth).then(() => window.location.href = "login.html");
