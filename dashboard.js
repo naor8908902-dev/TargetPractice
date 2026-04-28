@@ -39,7 +39,7 @@ function setButtonState(state, text) {
                          "btn btn-secondary game-btn";
 }
 
-// ─── התחלת משחק: 1 → המתן 3s → 64 ───────────────────────────
+// ─── התחלת משחק: 1 → 3s → 64 ─────────────────────────────────
 async function startGame() {
   isBusy = true;
   setButtonState("loading", "מתחיל...");
@@ -59,18 +59,20 @@ async function startGame() {
   }
 }
 
-// ─── סיום / איפוס: 65 → המתן 3s → 66 ────────────────────────
+// ─── סיום / איפוס: 0 → 3s → 65 → 3s → 66 ────────────────────
 async function stopAndReset(triggerBtn) {
   isBusy = true;
   const originalText = triggerBtn?.textContent ?? "";
   if (triggerBtn) { triggerBtn.disabled = true; triggerBtn.textContent = "מאפס..."; }
 
   try {
-    await send(65);
+    await send(0);      // עצור סרוו + הכל
     await sleep(3000);
 
-    await send(66);
+    await send(65);     // bit-0=1 → ammo reset to 7
     await sleep(3000);
+
+    await send(66);     // bit-0=0 → סיים reset
 
     const valB = document.getElementById("val-b");
     const valC = document.getElementById("val-c");
