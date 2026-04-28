@@ -12,8 +12,8 @@ const firebaseConfig = {
   appId: "1:440705339090:web:1bb3bdb73bb70c9453270b"
 };
 
-const app = initializeApp(firebaseConfig);
-const db  = getDatabase(app);
+const app  = initializeApp(firebaseConfig);
+const db   = getDatabase(app);
 const auth = getAuth(app);
 
 const toAlteraRef = ref(db, "toAltera");
@@ -24,21 +24,21 @@ let gameActive = false;
 
 const sleep = ms => new Promise(res => setTimeout(res, ms));
 
+// ─── עזר: שליחה ל-Firebase עם לוג ────────────────────────────
+async function send(value) {
+  console.log(`→ Firebase: ${value} (0b${value.toString(2).padStart(8, "0")})`);
+  await set(toAlteraRef, value);
+}
+
 // ─── עזר: עדכון מראה הכפתור הראשי ────────────────────────────
 function setButtonState(state, text) {
   if (!gameBtn) return;
   gameBtn.textContent = text;
   gameBtn.disabled    = (state === "loading");
   gameBtn.className   =
-    state === "active"  ? "btn btn-outline-danger game-btn"  :
-    state === "idle"    ? "btn btn-danger game-btn"           :
-                          "btn btn-secondary game-btn";
-}
-
-// ─── עזר: כתוב ערך ל-Firebase ─────────────────────────────────
-async function send(value) {
-  console.log("→ Firebase:", value, `(0b${value.toString(2).padStart(8,"0")})`);
-  await set(toAlteraRef, value);
+    state === "active" ? "btn btn-outline-danger game-btn" :
+    state === "idle"   ? "btn btn-danger game-btn"         :
+                         "btn btn-secondary game-btn";
 }
 
 // ─── התחלת משחק ───────────────────────────────────────────────
@@ -46,14 +46,21 @@ async function startGame() {
   isBusy = true;
   setButtonState("loading", "מתחיל...");
   try {
-    // שלב 1: הפעל FPGA (reset_in[0]=1 → ammo=7)
-    // ערך 1 = 0b00000001 → bit-0 HIGH → rising-edge → ammo reset to 7
-    await send(1);
-    await sleep(3000);   // המתן לRESET_HOLD ב-FPGA (10 ms) + רוחב-פס Firebase
+    // שלח 0 → ודא שה-FPGA ב-idle ו-reset_prev=0
+    await send(0);
+    await sleep(500);
 
-    // שלב 2: עבור למצב משחק פעיל (bit-6=1 → FPGA יודע שמשחק פעיל)
-    // ערך 64 = 0b01000000 → bit-0=0 (אין reset), bit-6=1 (game active)
-    await send(64);
+    // שלח 65 (0b01000001) → bit-0=1 → rising-edge → ammo=7
+    await send(65);
+    await sleep(2000);
+
+    // שלח 66 (0b01000010) → bit-0=0 → falling-edge, סיים רסט
+    await send(66);
+    await sleep(500);
+
+    // כעת המשחק פעיל, val-b אמור להיות 7
+    const valB = document.getElementById("val-b");
+    if (valB) valB.textContent = "7";
 
     gameActive = true;
     setButtonState("active", "סיים משחק");
@@ -65,35 +72,36 @@ async function startGame() {
   }
 }
 
-// ─── סיום משחק + איפוס מלא ────────────────────────────────────
+// ─── איפוס משחק ───────────────────────────────────────────────
 //
-// סדר הפעולות:
-//   1. שלח 0        → FPGA ב-idle, ללא reset
-//   2. שלח 1        → bit-0=1: rising-edge → ammo=7 ב-FPGA
-//   3. המתן 3 שניות → ה-FPGA מסיים את reset_hold ורענן את המטריצה
-//   4. שלח 0        → החזר ל-idle (bit-0 חוזר ל-0, reset_prev ← 0)
-//   5. עדכן UI      → val-b=7, val-c=0
+// רצף:
+//   1. שלח 0               → FPGA ב-idle, reset_prev←0
+//   2. המתן 2s
+//   3. שלח 65 (bit-0=1)    → rising-edge → ammo=7, reset_hold=150M קלוקים
+//   4. המתן 2s             → FPGA מסיים איפוס ומרענן מטריצה
+//   5. שלח 66 (bit-0=0)    → falling-edge, סיים סיגנל reset
+//   6. עדכן UI → val-b=7, val-c=0
+//   7. מחכה להפעלה מחדש (gameActive=false)
 //
-// שים לב: 66 = 0b01000010 → bit-0=0! לכן בגרסה הישנה ה-FPGA לא ראה reset.
-// כאן אנחנו שולחים 1 (0b00000001) בלבד כדי לטרגר את bit-0.
-// ──────────────────────────────────────────────────────────────
 async function stopAndReset(triggerBtn) {
   isBusy = true;
   const originalText = triggerBtn?.textContent ?? "";
   if (triggerBtn) { triggerBtn.disabled = true; triggerBtn.textContent = "מאפס..."; }
 
   try {
-    // שלב 1: כבה הכל – ודא שFPGA ב-idle ו-reset_prev=0
+    // שלב 1: idle
+    console.log("RESET 1: send 0 → idle");
     await send(0);
-    await sleep(600);
+    await sleep(2000);
 
-    // שלב 2: rising-edge על bit-0 → FPGA מאפס ammo ל-7
-    await send(1);   // 1 = 0b00000001 → bit-0=1 ✓
-    await sleep(3000); // המתן: reset_hold (500k cycles @ 50MHz ≈ 10ms) + Firebase latency
+    // שלב 2: rising-edge → ammo=7
+    console.log("RESET 2: send 65 → bit-0=1 → ammo reset to 7");
+    await send(65);   // 65 = 0b01000001 → bit-0=1 ✓
+    await sleep(2000);
 
-    // שלב 3: כבה reset – bit-0 חוזר ל-0; reset_prev יעודכן ל-0 בקלוק הבא
-    await send(0);
-    await sleep(500);
+    // שלב 3: falling-edge → סיים סיגנל reset
+    console.log("RESET 3: send 66 → bit-0=0 → end reset signal");
+    await send(66);   // 66 = 0b01000010 → bit-0=0
 
     // שלב 4: עדכן UI
     const valB = document.getElementById("val-b");
@@ -115,40 +123,45 @@ async function stopAndReset(triggerBtn) {
   }
 }
 
-// ─── כפתור ראשי: התחל / סיים ──────────────────────────────────
-function addClickAndTouch(el, handler) {
+// ─── עזר: הוסף click + touchstart לאלמנט ─────────────────────
+function addBtn(id, handler) {
+  const el = document.getElementById(id);
   if (!el) return;
   el.addEventListener("click",      handler);
   el.addEventListener("touchstart", handler, { passive: false });
 }
 
-addClickAndTouch(gameBtn, async (e) => {
-  if (e?.cancelable) e.preventDefault();
-  if (isBusy) return;
-  if (!gameActive) await startGame();
-  else             await stopAndReset(gameBtn);
-});
+// ─── כפתור ראשי: התחל / סיים ──────────────────────────────────
+if (gameBtn) {
+  const handler = async (e) => {
+    if (e?.cancelable) e.preventDefault();
+    if (isBusy) return;
+    if (!gameActive) await startGame();
+    else             await stopAndReset(gameBtn);
+  };
+  gameBtn.addEventListener("click",      handler);
+  gameBtn.addEventListener("touchstart", handler, { passive: false });
+}
 
 // ─── כפתור "טען מחדש" (reload ammo) ──────────────────────────
-addClickAndTouch(document.getElementById("resetShotsBtn"), async (e) => {
+addBtn("resetShotsBtn", async (e) => {
   if (e?.cancelable) e.preventDefault();
   if (isBusy) return;
   await stopAndReset(document.getElementById("resetShotsBtn"));
 });
 
-// ─── כפתור "איפוס פגיעות" (reset hits counter only) ──────────
-addClickAndTouch(document.getElementById("resetHitsBtn"), async (e) => {
+// ─── כפתור "איפוס פגיעות" בלבד (ללא איפוס תחמושת) ────────────
+addBtn("resetHitsBtn", async (e) => {
   if (e?.cancelable) e.preventDefault();
   if (isBusy) return;
-  // פגיעות מנוהלות בצד השרת/לוגיקה אחרת – שולחים 66 כפי שהיה
-  await send(66);
+  await send(66);  // שולח 66 בלבד — לא נוגע בbit-0, רק מאפס פגיעות
   const valC = document.getElementById("val-c");
   if (valC) valC.textContent = "0";
 });
 
 // ─── האזנה לנתונים מה-FPGA ────────────────────────────────────
 onValue(ref(db, "fromAltera"), (snapshot) => {
-  if (isBusy) return;   // אל תדרוס UI בזמן reset
+  if (isBusy) return;  // לא מדרסים UI בזמן איפוס
   const data = snapshot.val();
   if (!data) return;
   const valA = document.getElementById("val-a");
