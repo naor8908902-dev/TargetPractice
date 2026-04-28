@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -24,9 +24,37 @@ let gameActive = false;
 
 const sleep = ms => new Promise(res => setTimeout(res, ms));
 
-async function send(value) {
-  console.log(`→ Firebase: ${value} (0b${value.toString(2).padStart(8, "0")})`);
+// ─── שליחה אמינה ──────────────────────────────────────────────
+// הבעיה: Firebase יכול לדרוס ערך לפני שה-FPGA קרא אותו,
+// או לא לשלוח event אם הערך זהה לקודם.
+// הפתרון:
+//   1. אם הערך הנוכחי זהה למה שרוצים לשלוח → שלח קודם 0 (כדי לאלץ שינוי)
+//   2. שלח את הערך האמיתי
+//   3. המתן שה-FPGA יעבד
+//   4. שלח שוב (double-confirm) למקרה שהראשון לא נקרא
+async function sendReliable(value, waitMs = 1500) {
+  console.log(`→ sendReliable(${value})`);
+
+  // אם הערך הנוכחי ב-Firebase זהה → אלץ שינוי דרך 0
+  const snap = await get(toAlteraRef);
+  if (snap.val() === value) {
+    console.log(`  Same value detected (${value}), sending 0 first to force edge`);
+    await set(toAlteraRef, 0);
+    await sleep(300);
+  }
+
+  // שליחה ראשונה
   await set(toAlteraRef, value);
+  await sleep(waitMs);
+
+  // שליחה שנייה (double-confirm) — אם הFPGA החמיץ את הראשונה
+  // מאלצים edge: 0 → value שוב
+  await set(toAlteraRef, 0);
+  await sleep(300);
+  await set(toAlteraRef, value);
+  await sleep(waitMs);
+
+  console.log(`  sendReliable(${value}) done`);
 }
 
 function setButtonState(state, text) {
@@ -39,17 +67,16 @@ function setButtonState(state, text) {
                          "btn btn-secondary game-btn";
 }
 
-// ─── התחלת משחק: שלח 1 ואז 64 בלבד ───────────────────────────
+// ─── התחלת משחק: 1 → 64 ───────────────────────────────────────
 async function startGame() {
   isBusy = true;
   setButtonState("loading", "מתחיל...");
   try {
-    console.log("START 1: send 1 → activate FPGA");
-    await send(1);
-    await sleep(2000);
+    console.log("START: send 1 → activate FPGA");
+    await sendReliable(1, 1500);
 
-    console.log("START 2: send 64 → game active flag");
-    await send(64);
+    console.log("START: send 64 → game active");
+    await set(toAlteraRef, 64);
 
     gameActive = true;
     setButtonState("active", "סיים משחק");
@@ -61,24 +88,34 @@ async function startGame() {
   }
 }
 
-// ─── סיום / איפוס: שלח 0 → 65 → 66 ──────────────────────────
+// ─── סיום / איפוס: 0 → 65 → 66 ───────────────────────────────
+// כל פקודה נשלחת דרך sendReliable שמבטיחה שה-FPGA רואה את ה-edge
 async function stopAndReset(triggerBtn) {
   isBusy = true;
   const originalText = triggerBtn?.textContent ?? "";
   if (triggerBtn) { triggerBtn.disabled = true; triggerBtn.textContent = "מאפס..."; }
 
   try {
+    // שלב 1: idle — עצור הכל
     console.log("RESET 1: send 0 → idle");
-    await send(0);
-    await sleep(2000);
+    await set(toAlteraRef, 0);
+    await sleep(1000);
 
-    console.log("RESET 2: send 65 → bit-0=1 → ammo reset to 7");
-    await send(65);
-    await sleep(2000);
+    // שלב 2: איפוס תחמושת (bit-0=1 → rising edge → ammo=7)
+    // sendReliable מבטיח שה-FPGA רואה את ה-edge גם אם הרשת עיכבה
+    console.log("RESET 2: send 65 (bit-0=1) → ammo reset to 7");
+    await sendReliable(65, 2000);
 
-    console.log("RESET 3: send 66 → bit-0=0 → end reset signal");
-    await send(66);
+    // שלב 3: סיום סיגנל reset (bit-0=0 → falling edge)
+    console.log("RESET 3: send 66 (bit-0=0) → end reset");
+    await set(toAlteraRef, 66);
+    await sleep(500);
 
+    // שלב 4: חזרה ל-idle מוחלט
+    console.log("RESET 4: send 0 → final idle");
+    await set(toAlteraRef, 0);
+
+    // עדכון UI
     const valB = document.getElementById("val-b");
     const valC = document.getElementById("val-c");
     if (valB) valB.textContent = "7";
@@ -105,30 +142,29 @@ function addBtn(id, handler) {
   el.addEventListener("touchstart", handler, { passive: false });
 }
 
-// ─── כפתור ראשי: התחל / סיים ──────────────────────────────────
+// ─── כפתורים ──────────────────────────────────────────────────
 if (gameBtn) {
   const handler = async (e) => {
     if (e?.cancelable) e.preventDefault();
     if (isBusy) return;
-    if (!gameActive) await startGame();   // → שולח 1, אחר כך 64
-    else             await stopAndReset(gameBtn); // → שולח 0, 65, 66
+    if (!gameActive) await startGame();
+    else             await stopAndReset(gameBtn);
   };
   gameBtn.addEventListener("click",      handler);
   gameBtn.addEventListener("touchstart", handler, { passive: false });
 }
 
-// ─── כפתור "טען מחדש" ────────────────────────────────────────
 addBtn("resetShotsBtn", async (e) => {
   if (e?.cancelable) e.preventDefault();
   if (isBusy) return;
   await stopAndReset(document.getElementById("resetShotsBtn"));
 });
 
-// ─── כפתור "איפוס פגיעות" בלבד ───────────────────────────────
 addBtn("resetHitsBtn", async (e) => {
   if (e?.cancelable) e.preventDefault();
   if (isBusy) return;
-  await send(66);
+  // איפוס פגיעות בלבד — שלח 66 אמין
+  await sendReliable(66, 500);
   const valC = document.getElementById("val-c");
   if (valC) valC.textContent = "0";
 });
